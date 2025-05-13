@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lingo Phrase Cards Player</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .player-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .player-header {
+            padding: 16px;
+            font-size: 0.9em;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            color: white;
+            font-weight: 500;
+        }
+        .player-controls {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+        }
+        .play-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #4CAF50;
+            margin-right: 16px;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .play-button:focus {
+            outline: none;
+        }
+        .play-button:active {
+            outline: none;
+            background: transparent;
+        }
+        .play-button::-moz-focus-inner {
+            border: 0;
+        }
+        .material-icons {
+            font-size: 36px;
+        }
+        .progress-container {
+            flex-grow: 1;
+            margin-right: 16px;
+            position: relative;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+        .progress {
+            height: 100%;
+            background: #4CAF50;
+            border-radius: 2px;
+            width: 0%;
+            position: relative;
+        }
+        .progress::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -6px;
+            width: 16px;
+            height: 16px;
+            background: #4CAF50;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transform: scale(0);
+            transition: transform 0.1s;
+        }
+        .progress-container:hover .progress::after,
+        .progress-container:active .progress::after {
+            transform: scale(1);
+        }
+        .time {
+            font-size: 14px;
+            color: #757575;
+            min-width: 80px;
+            text-align: right;
+        }
+        
+        /* Für bessere Touch-Interaktion auf mobilen Geräten */
+        @media (max-width: 768px) {
+            .progress-bar {
+                height: 8px;
+            }
+            .progress::after {
+                transform: scale(1);
+                width: 20px;
+                height: 20px;
+                right: -10px;
+                top: -6px;
+            }
+            .progress-container {
+                padding: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="players-container"></div>
+
+    <script>
+        // Beispiel-JSON mit Titeln und MP3-Links
+
+        /**
+         * 3.4 Erweiterter Gebrauch des Passivs
+
+3.6 Subjunktiv (z. B. „If I were you…“)
+3.7 Satzverknüpfungen (however, although, thus...)
+3.8 Nominalstil & Umschreibungen
+3.9 Abstrakte Nomenbildung (rely → reliability)
+3.10 Argumentieren und Meinung ausdrücken
+3.11 Präsentationen halten (Struktur, Sprache)
+3.12 Verhandlungen auf Englisch
+3.13 Telefonate & Meetings
+3.14 Bewerbung & Lebenslauf
+3.15 Business-E-Mails & Briefe
+3.16 Interkulturelle Kommunikation
+3.17 Fachsprache: Marketing, Finanzen, IT
+3.18 Redewendungen im Geschäftsleben
+3.19 Fehleranalyse & Korrekturtraining
+3.20 Sprachbewusstsein & Feinheiten
+*/
+
+        const audioData = [
+            {
+                title: "3.1 If-Sätze Typ 3 & gemischte Formen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_01.mp3"
+            },
+            {
+                title: "3.2 Future Perfect / Future Continuous",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_02.mp3"
+            },
+            {
+                title: "3.3 Stilunterschiede: formell vs. informell",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_03.mp3"
+            },
+            {
+                title: "3.5 Präzise Ausdrucksformen & Kollokationen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_05.mp3"
+            },
+            {
+                title: "3.6 Subjunktiv (z. B. „If I were you…“)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_06.mp3"
+            },
+            {
+                title: "3.7 Satzverknüpfungen (however, although, thus...)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_07.mp3"
+            },
+            {
+                title: "3.8 Nominalstil & Umschreibungen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_08.mp3"
+            },
+            {
+                title: "3.9 Abstrakte Nomenbildung (rely → reliability)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_09.mp3"
+            },
+            {
+                title: "3.10 Argumentieren und Meinung ausdrücken",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_10.mp3"
+            },
+            {
+                title: "3.11 Präsentationen halten (Struktur, Sprache)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_11.mp3"
+            },
+            {
+                title: "3.12 Verhandlungen auf Englisch",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_12.mp3"
+            },
+            {
+                title: "3.13 Telefonate & Meetings",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_13.mp3"
+            },
+            {
+                title: "3.14 Bewerbung & Lebenslauf",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_14.mp3"
+            },
+            {
+                title: "3.15 Business-E-Mails & Briefe",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_15.mp3"
+            },
+            {
+                title: "3.16 Interkulturelle Kommunikation",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_16.mp3"
+            },
+            {
+                title: "3.17 Fachsprache: Marketing, Finanzen, IT",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_17.mp3"
+            },
+            {
+                title: "3.18 Redewendungen im Geschäftsleben",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_18.mp3"
+            },
+            {
+                title: "3.19 Fehleranalyse & Korrekturtraining",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_19.mp3"
+            },
+            {
+                title: "3.20 Sprachbewusstsein & Feinheiten",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_20.mp3"
+            }
+        ];
+
+        // Globale Variable für den aktuell spielenden Audio-Player
+        let currentlyPlaying = null;
+        
+        // Cache für Audiodauern
+        const durationCache = {};
+        
+        // Versuche, gespeicherte Dauern aus dem localStorage zu laden
+        try {
+            const cachedDurations = localStorage.getItem('audio-durations');
+            if (cachedDurations) {
+                Object.assign(durationCache, JSON.parse(cachedDurations));
+            }
+        } catch (e) {
+            console.error('Fehler beim Laden der gecachten Audiodauern:', e);
+        }
+
+        // Funktion zum Erstellen der Player
+        function createPlayers() {
+            const container = document.getElementById('players-container');
+            const audioElements = [];
+            
+            audioData.forEach((item, index) => {
+                const playerId = `player-${index}`;
+                const storageKey = `audio-position-${index}`;
+                const durationKey = item.mp3;
+                
+                // Player-Container erstellen
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-container';
+                playerDiv.innerHTML = `
+                    <div class="player-header">${item.title}</div>
+                    <div class="player-controls">
+                        <button class="play-button" id="play-${index}">
+                            <span class="material-icons">play_arrow</span>
+                        </button>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-${index}">
+                                <div class="progress" id="progress-${index}"></div>
+                            </div>
+                        </div>
+                        <div class="time" id="time-${index}">${durationCache[durationKey] && durationCache[durationKey] > 0 ? formatTime(durationCache[durationKey]) : ''}</div>
+                    </div>
+                `;
+                container.appendChild(playerDiv);
+                
+                // Audio-Element wird erst bei Bedarf erstellt
+                let audio = null;
+                
+                const playButton = document.getElementById(`play-${index}`);
+                const progressBar = document.getElementById(`progress-bar-${index}`);
+                const progress = document.getElementById(`progress-${index}`);
+                const timeDisplay = document.getElementById(`time-${index}`);
+                
+                // Funktion zum Initialisieren des Audio-Elements
+                function initAudio() {
+                    if (!audio) {
+                        audio = new Audio();
+                        audio.src = item.mp3;
+                        audio.id = playerId;
+                        audioElements.push(audio);
+                        
+                        // Gespeicherte Position laden
+                        const savedPosition = localStorage.getItem(storageKey);
+                        if (savedPosition) {
+                            audio.currentTime = parseFloat(savedPosition);
+                        }
+                        
+                        // Wenn Metadaten geladen sind (Dauer verfügbar)
+                        audio.addEventListener('loadedmetadata', () => {
+                            // Dauer im Cache speichern
+                            durationCache[durationKey] = audio.duration;
+                            
+                            // Cache in localStorage speichern
+                            try {
+                                localStorage.setItem('audio-durations', JSON.stringify(durationCache));
+                            } catch (e) {
+                                console.error('Fehler beim Speichern der Audiodauern:', e);
+                            }
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+                        });
+                        
+                        // Fortschritt aktualisieren
+                        audio.addEventListener('timeupdate', () => {
+                            const percent = (audio.currentTime / audio.duration) * 100;
+                            progress.style.width = `${percent}%`;
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+                            
+                            // Position im LocalStorage speichern
+                            localStorage.setItem(storageKey, audio.currentTime.toString());
+                        });
+                        
+                        // Wenn Audio zu Ende ist
+                        audio.addEventListener('ended', () => {
+                            playButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                            audio.currentTime = 0;
+                            localStorage.removeItem(storageKey);
+                            currentlyPlaying = null;
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+                        });
+                    }
+                    return audio;
+                }
+                
+                // Funktion zum Aktualisieren der Zeitanzeige
+                function updateTimeDisplay() {
+                    const currentTime = audio && audio.currentTime > 0 ? formatTime(audio.currentTime) : '';
+                    const duration = audio && audio.duration > 0 ? formatTime(audio.duration) : 
+                                    (durationCache[durationKey] && durationCache[durationKey] > 0 ? formatTime(durationCache[durationKey]) : '');
+                    
+                    if (currentTime && duration) {
+                        timeDisplay.textContent = `${currentTime} / ${duration}`;
+                    } else if (duration) {
+                        timeDisplay.textContent = duration;
+                    } else {
+                        timeDisplay.textContent = '';
+                    }
+                }
+                
+                // Funktion zum Formatieren der Zeit
+                function formatTime(seconds) {
+                    if (!seconds || isNaN(seconds)) return '0:00';
+                    
+                    const minutes = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+                    
+                    return `${minutes}:${secs}`;
+                }
+                
+                // Gespeicherte Position anzeigen, falls vorhanden
+                const savedPosition = localStorage.getItem(storageKey);
+                if (savedPosition && parseFloat(savedPosition) > 0 && durationCache[durationKey] && durationCache[durationKey] > 0) {
+                    const currentTime = formatTime(parseFloat(savedPosition));
+                    const duration = formatTime(durationCache[durationKey]);
+                    timeDisplay.textContent = `${currentTime} / ${duration}`;
+                    
+                    // Fortschrittsbalken aktualisieren
+                    const percent = (parseFloat(savedPosition) / durationCache[durationKey]) * 100;
+                    progress.style.width = `${percent}%`;
+                } else if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                    // Nur die Dauer anzeigen, wenn keine Position gespeichert ist
+                    timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                } else {
+                    // Nichts anzeigen, wenn weder Position noch Dauer bekannt sind
+                    timeDisplay.textContent = '';
+                }
+                
+                // Play/Pause-Funktion
+                playButton.addEventListener('click', () => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        audio = initAudio();
+                    }
+                    
+                    if (audio.paused) {
+                        // Wenn ein anderer Player gerade spielt, diesen pausieren
+                        if (currentlyPlaying && currentlyPlaying !== audio) {
+                            currentlyPlaying.pause();
+                            // Den Play-Button des anderen Players zurücksetzen
+                            const otherIndex = audioElements.indexOf(currentlyPlaying);
+                            if (otherIndex !== -1) {
+                                document.getElementById(`play-${otherIndex}`).innerHTML = 
+                                    '<span class="material-icons">play_arrow</span>';
+                            }
+                        }
+                        
+                        audio.play();
+                        currentlyPlaying = audio;
+                        playButton.innerHTML = '<span class="material-icons">pause</span>';
+                    } else {
+                        audio.pause();
+                        currentlyPlaying = null;
+                        playButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                    }
+                });
+                
+                // Drag-Funktionalität für den Fortschrittsbalken
+                let isDragging = false;
+                
+                // Klick und Touch auf Fortschrittsbalken
+                progressBar.addEventListener('mousedown', (e) => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        initAudio();
+                    }
+                    
+                    isDragging = true;
+                    updateProgressFromEvent(e);
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+                
+                progressBar.addEventListener('touchstart', (e) => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        initAudio();
+                    }
+                    
+                    isDragging = true;
+                    updateProgressFromEvent(e);
+                    document.addEventListener('touchmove', handleTouchMove);
+                    document.addEventListener('touchend', handleTouchEnd);
+                });
+                
+                function handleMouseMove(e) {
+                    if (isDragging) {
+                        updateProgressFromEvent(e);
+                    }
+                }
+                
+                function handleTouchMove(e) {
+                    if (isDragging) {
+                        e.preventDefault(); // Verhindert Scrollen während des Ziehens
+                        updateProgressFromEvent(e);
+                    }
+                }
+                
+                function handleMouseUp() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+                
+                function handleTouchEnd() {
+                    isDragging = false;
+                    document.removeEventListener('touchmove', handleTouchMove);
+                    document.removeEventListener('touchend', handleTouchEnd);
+                }
+                
+                function updateProgressFromEvent(e) {
+                    if (!audio) return;
+                    
+                    const rect = progressBar.getBoundingClientRect();
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    let pos = (clientX - rect.left) / rect.width;
+                    
+                    // Begrenze den Wert zwischen 0 und 1
+                    pos = Math.max(0, Math.min(1, pos));
+                    
+                    audio.currentTime = pos * audio.duration;
+                }
+            });
+        }
+        
+        // Player erstellen, wenn die Seite geladen ist
+        document.addEventListener('DOMContentLoaded', createPlayers);
+    </script>
+</body>
+</html>
