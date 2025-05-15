@@ -128,28 +128,111 @@
         // Beispiel-JSON mit Titeln und MP3-Links
 
         /**
-         * 3.4 Erweiterter Gebrauch des Passivs
-
-3.6 Subjunktiv (z. B. „If I were you…“)
-3.7 Satzverknüpfungen (however, although, thus...)
-3.8 Nominalstil & Umschreibungen
-3.9 Abstrakte Nomenbildung (rely → reliability)
-3.10 Argumentieren und Meinung ausdrücken
-3.11 Präsentationen halten (Struktur, Sprache)
-3.12 Verhandlungen auf Englisch
-3.13 Telefonate & Meetings
-3.14 Bewerbung & Lebenslauf
-3.15 Business-E-Mails & Briefe
-3.16 Interkulturelle Kommunikation
-3.17 Fachsprache: Marketing, Finanzen, IT
-3.18 Redewendungen im Geschäftsleben
-3.19 Fehleranalyse & Korrekturtraining
-3.20 Sprachbewusstsein & Feinheiten
+2.1 Present Continuous (gerade laufende Handlungen)
+2.2 Vergleich Present Simple vs. Continuous
+2.3 Past Simple (Vergangenheit)
+2.4 Unregelmäßige Verben
+2.5 Past Continuous
+2.6 Present Perfect (Erfahrungen, Resultate)
+2.7 Future Formen: will, going to, present continuous
+2.8 Modalverben: must, should, might
+2.9 If-Sätze Typ 1 & 2
+2.10 Relativsätze (who, which, that)
+2.11 Indirekte Rede (reported speech)
+2.12 Gerund (Verb + -ing)
+2.13 Infinitiv mit „to“
+2.14 Passiv (The book was written...)
+2.15 Präpositionen der Zeit (on Monday, in July...)
+2.16 Adjektiv- und Adverbunterschiede
+2.17 Vokabelthemen: Reisen, Arbeit, Gesundheit
+2.18 Redewendungen & Idiome (basics)
+2.19 E-Mails schreiben (informell/formell)
+2.20 Small Talk führen
 */
 
         const LOCALSTORAGE_PREFIX = "lingophrasecards_de_en";
 
         const audioData = [
+            {
+                title: "2.1 Present Continuous (gerade laufende Handlungen)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_01.mp3"
+            },
+            {
+                title: "2.2 Vergleich Present Simple vs. Continuous",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_02.mp3"
+            },
+            {
+                title: "2.3 Past Simple (Vergangenheit)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_03.mp3"
+            },
+            {
+                title: "2.4 Unregelmäßige Verben",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_04.mp3"
+            },
+            {
+                title: "2.5 Past Continuous",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_05.mp3"
+            },
+            {
+                title: "2.6 Present Perfect (Erfahrungen, Resultate)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_06.mp3"
+            },
+            {
+                title: "2.7 Future Formen: will, going to, present continuous",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_07.mp3"
+            },
+            {
+                title: "2.8 Modalverben: must, should, might",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_08.mp3"
+            },
+            {
+                title: "2.9 If-Sätze Typ 1 & 2",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_09.mp3"
+            },
+            {
+                title: "2.10 Relativsätze (who, which, that)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_10.mp3"
+            },
+            {
+                title: "2.11 Indirekte Rede (reported speech)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_11.mp3"
+            },
+            {
+                title: "2.12 Gerund (Verb + -ing)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_12.mp3"
+            },
+            {
+                title: "2.13 Infinitiv mit „to“",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_13.mp3"
+            },
+            {
+                title: "2.14 Passiv (The book was written...)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_14.mp3"
+            },
+            {
+                title: "2.15 Präpositionen der Zeit (on Monday, in July...)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_15.mp3"
+            },
+            {
+                title: "2.16 Adjektiv- und Adverbunterschiede",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_16.mp3"
+            },
+            {
+                title: "2.17 Vokabelthemen: Reisen, Arbeit, Gesundheit",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_17.mp3"
+            },
+            {
+                title: "2.18 Redewendungen & Idiome (basics)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_18.mp3"
+            },
+            {
+                title: "2.19 E-Mails schreiben (informell/formell)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_19.mp3"
+            },
+            {
+                title: "2.20 Small Talk führen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_20.mp3"
+            },
             {
                 title: "3.1 If-Sätze Typ 3 & gemischte Formen",
                 mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/3_01.mp3"
