@@ -11,62 +11,114 @@
             font-family: 'Roboto', sans-serif;
             background-color: #f5f5f5;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
+            color: #212121;
+            /* Verhindert Zoom bei Doppelklick */
+            touch-action: manipulation;
+        }
+        
+        /* Verhindert Textauswahl und damit verbundenes Zoomen */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Erlaubt Textauswahl nur in bestimmten Elementen, falls nötig */
+        .selectable-text {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
         .player-container {
-            max-width: 600px;
-            margin: 20px auto;
+            max-width: 500px;
+            margin: 8px auto;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.12);
             overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        .player-container:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.16);
         }
         .player-header {
-            padding: 16px;
-            font-size: 0.9em;
-            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            padding: 10px 14px;
+            font-size: 0.85em;
+            background: linear-gradient(to right, rgba(100, 149, 237, 0.85), rgba(138, 180, 248, 0.75));
             color: white;
             font-weight: 500;
+            line-height: 1.3;
+        }
+        .player-description {
+            padding: 8px 14px;
+            font-size: 0.7em;
+            color: #a2a2a2;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+            line-height: 1.4;
+        }
+        .section-headline {
+            padding: 8px 14px;
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #939393;
+            /** background-color: rgba(138, 180, 248, 0.25);*/
+            margin: 14px 0 6px 0;
+            border-radius: 4px;
+            text-align: center;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            /*box-shadow: 0 1px 1px rgba(0,0,0,0.05);*/
         }
         .player-controls {
             display: flex;
             align-items: center;
-            padding: 16px;
-            border-bottom: 1px solid #eee;
+            padding: 6px 14px;
+            border-bottom: none;
         }
         .play-button {
             background: none;
             border: none;
             cursor: pointer;
-            color: #4CAF50;
-            margin-right: 16px;
+            color: #6495ED;
+            margin-right: 10px;
             outline: none;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
+            padding: 4px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .play-button:hover {
+            background-color: rgba(100, 149, 237, 0.08);
         }
         .play-button:focus {
             outline: none;
         }
         .play-button:active {
             outline: none;
-            background: transparent;
+            background-color: rgba(100, 149, 237, 0.16);
         }
         .play-button::-moz-focus-inner {
             border: 0;
         }
         .material-icons {
-            font-size: 36px;
+            font-size: 24px;
         }
         .progress-container {
             flex-grow: 1;
-            margin-right: 16px;
+            margin-right: 10px;
             position: relative;
         }
         .progress-bar {
             width: 100%;
-            height: 4px;
+            height: 3px;
             background: #e0e0e0;
             border-radius: 2px;
             position: relative;
@@ -74,7 +126,7 @@
         }
         .progress {
             height: 100%;
-            background: #4CAF50;
+            background: #6495ED;
             border-radius: 2px;
             width: 0%;
             position: relative;
@@ -82,13 +134,13 @@
         .progress::after {
             content: '';
             position: absolute;
-            right: -6px;
-            top: -6px;
-            width: 16px;
-            height: 16px;
-            background: #4CAF50;
+            right: -4px;
+            top: -4px;
+            width: 12px;
+            height: 12px;
+            background: #6495ED;
             border-radius: 50%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
             transform: scale(0);
             transition: transform 0.1s;
         }
@@ -97,26 +149,51 @@
             transform: scale(1);
         }
         .time {
-            font-size: 14px;
+            font-size: 11px;
             color: #757575;
-            min-width: 80px;
+            min-width: 65px;
             text-align: right;
+        }
+        
+        .completed-indicator {
+            margin-left: 5px;
+            color: #4CAF50;
+            display: none;
+            font-size: 18px;
+        }
+        
+        .reset-button {
+            margin-left: 5px;
+            color: #9e9e9e;
+            cursor: pointer;
+            display: none;
+            font-size: 18px;
+        }
+        
+        .reset-button:hover {
+            color: #f44336;
         }
         
         /* Für bessere Touch-Interaktion auf mobilen Geräten */
         @media (max-width: 768px) {
             .progress-bar {
-                height: 8px;
+                height: 5px;
             }
             .progress::after {
                 transform: scale(1);
-                width: 20px;
-                height: 20px;
-                right: -10px;
-                top: -6px;
+                width: 14px;
+                height: 14px;
+                right: -7px;
+                top: -4px;
             }
             .progress-container {
-                padding: 10px 0;
+                padding: 6px 0;
+            }
+            .player-container {
+                margin: 8px auto;
+            }
+            .section-headline {
+                margin: 10px auto 5px auto;
             }
         }
     </style>
@@ -143,8 +220,8 @@
 1.13 Häufige Verben (go, have, do...)
 1.14 Present Simple (Gegenwart)
 1.15 Adverbien der Häufigkeit (always, sometimes...)
-1.16 Modalverben: can / can’t
-1.17 Fragen mit „do“ / „does“
+1.16 Modalverben: can / can't
+1.17 Fragen mit "do" / "does"
 1.18 Wortstellung im Satz
 1.19 Vokabelthemen: Familie, Alltag, Essen
 1.20 Kleine Dialoge: sich vorstellen, einkaufen
@@ -153,6 +230,9 @@
         const LOCALSTORAGE_PREFIX = "lingophrasecards_de_en";
 
         const audioData = [
+            {
+                headline: "1. Beginner (Anfänger)",
+            },
             {
                 title: "1.1 Alphabet & Aussprache",
                 mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/1_01.mp3"
@@ -234,6 +314,9 @@
                 mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/1_20.mp3"
             },
             {
+                headline: "2. Intermediate (Mittelstufe)",
+            },
+            {
                 title: "2.1 Present Continuous (gerade laufende Handlungen)",
                 mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_01.mp3"
             },
@@ -282,7 +365,7 @@
                 mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_12.mp3"
             },
             {
-                title: "2.13 Infinitiv mit „to“",
+                title: "2.13 Infinitiv mit 'to'",
                 mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_13.mp3"
             },
             {
@@ -312,6 +395,9 @@
             {
                 title: "2.20 Small Talk führen",
                 mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/en/2_20.mp3"
+            },
+            {
+                headline: "3. Advanced (Fortgeschritten/Profi)",
             },
             {
                 title: "3.1 If-Sätze Typ 3 & gemischte Formen",
@@ -412,7 +498,19 @@
             const container = document.getElementById('players-container');
             const audioElements = [];
             
+            let currentHeadline = null;
+            
             audioData.forEach((item, index) => {
+                // Wenn es sich um eine Überschrift handelt
+                if (item.headline) {
+                    const headlineDiv = document.createElement('div');
+                    headlineDiv.className = 'section-headline';
+                    headlineDiv.textContent = item.headline;
+                    container.appendChild(headlineDiv);
+                    currentHeadline = item.headline;
+                    return; // Überschriften haben keinen Player, daher hier beenden
+                }
+                
                 const playerId = `player-${index}`;
                 const storageKey = `${LOCALSTORAGE_PREFIX}_${item.mp3.split('/').pop()}`;
                 const durationKey = item.mp3;
@@ -420,8 +518,16 @@
                 // Player-Container erstellen
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'player-container';
-                playerDiv.innerHTML = `
-                    <div class="player-header">${item.title}</div>
+                
+                // HTML für den Player erstellen, mit optionaler Beschreibung
+                let playerHTML = `<div class="player-header">${item.title}</div>`;
+                
+                // Beschreibung hinzufügen, falls vorhanden
+                if (item.description) {
+                    playerHTML += `<div class="player-description">${item.description}</div>`;
+                }
+                
+                playerHTML += `
                     <div class="player-controls">
                         <button class="play-button" id="play-${index}">
                             <span class="material-icons">play_arrow</span>
@@ -432,8 +538,12 @@
                             </div>
                         </div>
                         <div class="time" id="time-${index}">${durationCache[durationKey] && durationCache[durationKey] > 0 ? formatTime(durationCache[durationKey]) : ''}</div>
+                        <span class="material-icons completed-indicator" id="completed-${index}">check_circle</span>
+                        <span class="material-icons reset-button" id="reset-${index}" title="Fortschritt zurücksetzen">restart_alt</span>
                     </div>
                 `;
+                
+                playerDiv.innerHTML = playerHTML;
                 container.appendChild(playerDiv);
                 
                 // Audio-Element wird erst bei Bedarf erstellt
@@ -443,6 +553,8 @@
                 const progressBar = document.getElementById(`progress-bar-${index}`);
                 const progress = document.getElementById(`progress-${index}`);
                 const timeDisplay = document.getElementById(`time-${index}`);
+                const completedIndicator = document.getElementById(`completed-${index}`);
+                const resetButton = document.getElementById(`reset-${index}`);
                 
                 // Funktion zum Initialisieren des Audio-Elements
                 function initAudio() {
@@ -455,7 +567,8 @@
                         // Gespeicherte Position laden
                         const savedPosition = localStorage.getItem(storageKey);
                         if (savedPosition) {
-                            audio.currentTime = parseFloat(savedPosition);
+                            const position = parseFloat(savedPosition);
+                            audio.currentTime = isNaN(position) ? 0 : position;
                         }
                         
                         // Wenn Metadaten geladen sind (Dauer verfügbar)
@@ -472,6 +585,16 @@
                             
                             // Zeit-Anzeige aktualisieren
                             updateTimeDisplay();
+                            
+                            // Fortschrittsbalken aktualisieren, falls eine Position gespeichert ist
+                            const savedPosition = localStorage.getItem(storageKey);
+                            if (savedPosition) {
+                                const position = parseFloat(savedPosition);
+                                if (!isNaN(position) && position > 0) {
+                                    const percent = (position / audio.duration) * 100;
+                                    progress.style.width = `${percent}%`;
+                                }
+                            }
                         });
                         
                         // Fortschritt aktualisieren
@@ -484,6 +607,11 @@
                             
                             // Position im LocalStorage speichern
                             localStorage.setItem(storageKey, audio.currentTime.toString());
+                            
+                            // Reset-Button anzeigen, wenn Fortschritt vorhanden
+                            if (audio.currentTime > 0 && !localStorage.getItem(`${storageKey}_completed`)) {
+                                resetButton.style.display = 'inline';
+                            }
                         });
                         
                         // Wenn Audio zu Ende ist
@@ -492,6 +620,10 @@
                             audio.currentTime = 0;
                             localStorage.removeItem(storageKey);
                             currentlyPlaying = null;
+                            
+                            // Als abgeschlossen markieren
+                            localStorage.setItem(`${storageKey}_completed`, 'true');
+                            checkCompletion();
                             
                             // Zeit-Anzeige aktualisieren
                             updateTimeDisplay();
@@ -525,16 +657,45 @@
                     return `${minutes}:${secs}`;
                 }
                 
+                // Funktion zum Prüfen, ob die Folge als abgeschlossen markiert werden soll
+                function checkCompletion() {
+                    const completionKey = `${storageKey}_completed`;
+                    const isCompleted = localStorage.getItem(completionKey) === 'true';
+                    
+                    if (isCompleted) {
+                        completedIndicator.style.display = 'inline';
+                        resetButton.style.display = 'inline';
+                    } else {
+                        completedIndicator.style.display = 'none';
+                        
+                        // Reset-Button nur anzeigen, wenn es einen Fortschritt gibt
+                        const hasProgress = localStorage.getItem(storageKey) && parseFloat(localStorage.getItem(storageKey)) > 0;
+                        resetButton.style.display = hasProgress ? 'inline' : 'none';
+                    }
+                }
+                
+                // Initialen Zustand prüfen
+                checkCompletion();
+                
                 // Gespeicherte Position anzeigen, falls vorhanden
                 const savedPosition = localStorage.getItem(storageKey);
-                if (savedPosition && parseFloat(savedPosition) > 0 && durationCache[durationKey] && durationCache[durationKey] > 0) {
-                    const currentTime = formatTime(parseFloat(savedPosition));
-                    const duration = formatTime(durationCache[durationKey]);
-                    timeDisplay.textContent = `${currentTime} / ${duration}`;
-                    
-                    // Fortschrittsbalken aktualisieren
-                    const percent = (parseFloat(savedPosition) / durationCache[durationKey]) * 100;
-                    progress.style.width = `${percent}%`;
+                if (savedPosition) {
+                    const position = parseFloat(savedPosition);
+                    if (!isNaN(position) && position > 0 && durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        const currentTime = formatTime(position);
+                        const duration = formatTime(durationCache[durationKey]);
+                        timeDisplay.textContent = `${currentTime} / ${duration}`;
+                        
+                        // Fortschrittsbalken aktualisieren
+                        const percent = (position / durationCache[durationKey]) * 100;
+                        progress.style.width = `${percent}%`;
+                        
+                        // Reset-Button anzeigen
+                        resetButton.style.display = 'inline';
+                    } else if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        // Nur die Dauer anzeigen, wenn keine gültige Position gespeichert ist
+                        timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                    }
                 } else if (durationCache[durationKey] && durationCache[durationKey] > 0) {
                     // Nur die Dauer anzeigen, wenn keine Position gespeichert ist
                     timeDisplay.textContent = formatTime(durationCache[durationKey]);
@@ -542,6 +703,30 @@
                     // Nichts anzeigen, wenn weder Position noch Dauer bekannt sind
                     timeDisplay.textContent = '';
                 }
+                
+                // Reset-Button-Funktionalität
+                resetButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Verhindert, dass der Click-Event zum Player durchdringt
+                    
+                    // Fortschritt zurücksetzen
+                    localStorage.removeItem(storageKey);
+                    localStorage.removeItem(`${storageKey}_completed`);
+                    
+                    if (audio) {
+                        audio.currentTime = 0;
+                        progress.style.width = '0%';
+                    }
+                    
+                    // Anzeige aktualisieren
+                    if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                    } else {
+                        timeDisplay.textContent = '';
+                    }
+                    
+                    // Status-Anzeigen aktualisieren
+                    checkCompletion();
+                });
                 
                 // Play/Pause-Funktion
                 playButton.addEventListener('click', () => {
@@ -557,8 +742,10 @@
                             // Den Play-Button des anderen Players zurücksetzen
                             const otherIndex = audioElements.indexOf(currentlyPlaying);
                             if (otherIndex !== -1) {
-                                document.getElementById(`play-${otherIndex}`).innerHTML = 
-                                    '<span class="material-icons">play_arrow</span>';
+                                const otherPlayButton = document.getElementById(`play-${otherIndex}`);
+                                if (otherPlayButton) {
+                                    otherPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                                }
                             }
                         }
                         
@@ -626,7 +813,7 @@
                 }
                 
                 function updateProgressFromEvent(e) {
-                    if (!audio) return;
+                    if (!audio || !audio.duration || isNaN(audio.duration)) return;
                     
                     const rect = progressBar.getBoundingClientRect();
                     const clientX = e.clientX || (e.touches && e.touches[0].clientX);
@@ -635,7 +822,11 @@
                     // Begrenze den Wert zwischen 0 und 1
                     pos = Math.max(0, Math.min(1, pos));
                     
-                    audio.currentTime = pos * audio.duration;
+                    // Stelle sicher, dass wir einen gültigen Wert haben
+                    const newTime = pos * audio.duration;
+                    if (!isNaN(newTime) && isFinite(newTime)) {
+                        audio.currentTime = newTime;
+                    }
                 }
             });
         }
