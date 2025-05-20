@@ -56,10 +56,12 @@ def merge_audio_files(folder, audio_file1, audio_file2, output_name=None):
         
         # Konvertiere beide Dateien ins gleiche Format (MP3)
         convert_cmd1 = [
-            "ffmpeg", "-y", "-i", str(audio1_path), "-acodec", "libmp3lame", str(temp_file1)
+            "ffmpeg", "-y", "-i", str(audio1_path), "-acodec", "libmp3lame", 
+            "-b:a", "192k", str(temp_file1)
         ]
         convert_cmd2 = [
-            "ffmpeg", "-y", "-i", str(audio2_path), "-acodec", "libmp3lame", str(temp_file2)
+            "ffmpeg", "-y", "-i", str(audio2_path), "-acodec", "libmp3lame", 
+            "-b:a", "192k", str(temp_file2)
         ]
         
         print(f"Konvertiere erste Datei: {' '.join(convert_cmd1)}")
@@ -95,6 +97,7 @@ def merge_audio_files(folder, audio_file1, audio_file2, output_name=None):
             "-i", str(temp_file2),
             "-filter_complex", "[0:a][1:a]concat=n=2:v=0:a=1[out]",
             "-map", "[out]",
+            "-b:a", "192k",
             str(output_path)
         ]
         
