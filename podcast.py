@@ -3,7 +3,7 @@ import sys
 import subprocess
 from pathlib import Path
 
-def merge_audio_files(folder, audio_file1, audio_file2, output_name=None):
+def merge_audio_files(folder, audio_file1, audio_file2, output_name=None, bitrate="192k"):
     """
     Fügt zwei Audio-Dateien zusammen und speichert das Ergebnis
     
@@ -13,6 +13,7 @@ def merge_audio_files(folder, audio_file1, audio_file2, output_name=None):
         audio_file2 (str): Zweite Audio-Datei (mp3, wav)
         output_name (str, optional): Name der Ausgabedatei (mp3). 
                                     Wenn None, wird "SP_" + Name der zweiten Datei (ohne Erweiterung) + ".mp3" verwendet
+        bitrate (str, optional): Bitrate für die MP3-Konvertierung (Standard: "192k")
     
     Returns:
         bool: True bei Erfolg, False bei Fehler
@@ -57,11 +58,11 @@ def merge_audio_files(folder, audio_file1, audio_file2, output_name=None):
         # Konvertiere beide Dateien ins gleiche Format (MP3)
         convert_cmd1 = [
             "ffmpeg", "-y", "-i", str(audio1_path), "-acodec", "libmp3lame", 
-            "-b:a", "192k", str(temp_file1)
+            "-b:a", bitrate, str(temp_file1)
         ]
         convert_cmd2 = [
             "ffmpeg", "-y", "-i", str(audio2_path), "-acodec", "libmp3lame", 
-            "-b:a", "192k", str(temp_file2)
+            "-b:a", bitrate, str(temp_file2)
         ]
         
         print(f"Konvertiere erste Datei: {' '.join(convert_cmd1)}")
@@ -97,7 +98,7 @@ def merge_audio_files(folder, audio_file1, audio_file2, output_name=None):
             "-i", str(temp_file2),
             "-filter_complex", "[0:a][1:a]concat=n=2:v=0:a=1[out]",
             "-map", "[out]",
-            "-b:a", "192k",
+            "-b:a", bitrate,
             str(output_path)
         ]
         
@@ -140,7 +141,7 @@ def main():
     # Argumente aus der Kommandozeile lesen
     if len(sys.argv) < 4:
         print("Fehler: Mindestens drei Parameter werden benötigt.")
-        print("Verwendung: python script.py <ordner> <audio1> <audio2> [output_name.mp3]")
+        print("Verwendung: python script.py <ordner> <audio1> <audio2> [output_name.mp3] [bitrate]")
         sys.exit(1)
     
     folder = sys.argv[1]
@@ -152,7 +153,12 @@ def main():
     if len(sys.argv) > 4:
         output_name = sys.argv[4]
     
-    success = merge_audio_files(folder, audio_file1, audio_file2, output_name)
+    # Optionaler fünfter Parameter für die Bitrate
+    bitrate = "192k"
+    if len(sys.argv) > 5:
+        bitrate = sys.argv[5]
+    
+    success = merge_audio_files(folder, audio_file1, audio_file2, output_name, bitrate)
     
     if not success:
         sys.exit(1)
