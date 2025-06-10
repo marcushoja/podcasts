@@ -676,6 +676,15 @@ C – Fortgeschritten (C1 & C2)
                             
                             // Zeit-Anzeige aktualisieren
                             updateTimeDisplay();
+                            Android.stopAudioService();
+                        });
+
+                        audio.addEventListener('pause', () => {
+                            Android.stopAudioService();
+                        });
+
+                        audio.addEventListener('play', () => {
+                            Android.startAudioService();
                         });
                     }
                     return audio;
