@@ -447,6 +447,16 @@
                             
                             // Zeit-Anzeige aktualisieren
                             updateTimeDisplay();
+
+                            Android.stopAudioService();
+                        });
+
+                        audio.addEventListener('pause', () => {
+                            Android.stopAudioService();
+                        });
+
+                        audio.addEventListener('play', () => {
+                            Android.startAudioService();
                         });
                     }
                     return audio;
