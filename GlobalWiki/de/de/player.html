@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lingo Phrase Cards Player</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 16px;
+            color: #212121;
+            /* Verhindert Zoom bei Doppelklick */
+            touch-action: manipulation;
+        }
+        
+        /* Verhindert Textauswahl und damit verbundenes Zoomen */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Erlaubt Textauswahl nur in bestimmten Elementen, falls nötig */
+        .selectable-text {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        .player-container {
+            max-width: 500px;
+            margin: 8px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.12);
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        .player-container:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.16);
+        }
+        .player-header {
+            padding: 10px 14px;
+            font-size: 0.85em;
+            background: linear-gradient(to right, rgba(100, 149, 237, 0.85), rgba(138, 180, 248, 0.75));
+            color: white;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+        .player-description {
+            padding: 8px 14px;
+            font-size: 0.7em;
+            color: #a2a2a2;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+            line-height: 1.4;
+        }
+        .section-headline {
+            padding: 8px 14px;
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #939393;
+            /** background-color: rgba(138, 180, 248, 0.25);*/
+            margin: 14px 0 6px 0;
+            border-radius: 4px;
+            text-align: center;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            /*box-shadow: 0 1px 1px rgba(0,0,0,0.05);*/
+        }
+        .player-controls {
+            display: flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-bottom: none;
+        }
+        .play-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6495ED;
+            margin-right: 10px;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            padding: 4px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .play-button:hover {
+            background-color: rgba(100, 149, 237, 0.08);
+        }
+        .play-button:focus {
+            outline: none;
+        }
+        .play-button:active {
+            outline: none;
+            background-color: rgba(100, 149, 237, 0.16);
+        }
+        .play-button::-moz-focus-inner {
+            border: 0;
+        }
+        .material-icons {
+            font-size: 24px;
+        }
+        .progress-container {
+            flex-grow: 1;
+            margin-right: 10px;
+            position: relative;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+        .progress {
+            height: 100%;
+            background: #6495ED;
+            border-radius: 2px;
+            width: 0%;
+            position: relative;
+        }
+        .progress::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: -4px;
+            width: 12px;
+            height: 12px;
+            background: #6495ED;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transform: scale(0);
+            transition: transform 0.1s;
+        }
+        .progress-container:hover .progress::after,
+        .progress-container:active .progress::after {
+            transform: scale(1);
+        }
+        .time {
+            font-size: 11px;
+            color: #757575;
+            min-width: 65px;
+            text-align: right;
+        }
+        
+        .completed-indicator {
+            margin-left: 5px;
+            color: #4CAF50;
+            display: none;
+            font-size: 18px;
+        }
+        
+        .reset-button {
+            margin-left: 5px;
+            color: #9e9e9e;
+            cursor: pointer;
+            display: none;
+            font-size: 18px;
+        }
+        
+        .reset-button:hover {
+            color: #f44336;
+        }
+        
+        /* Für bessere Touch-Interaktion auf mobilen Geräten */
+        @media (max-width: 768px) {
+            .progress-bar {
+                height: 5px;
+            }
+            .progress::after {
+                transform: scale(1);
+                width: 14px;
+                height: 14px;
+                right: -7px;
+                top: -4px;
+            }
+            .progress-container {
+                padding: 6px 0;
+            }
+            .player-container {
+                margin: 8px auto;
+            }
+            .section-headline {
+                margin: 10px auto 5px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="players-container"></div>
+
+    <script>
+        // Beispiel-JSON mit Titeln und MP3-Links
+
+        /**
+1.1 Alphabet & Aussprache
+1.2 Zahlen, Datum, Uhrzeit
+1.3 Personalpronomen
+1.4 "To be" – sein
+1.5 "There is / There are"
+1.6 Fragen stellen (Yes/No, W-Fragen)
+1.7 Einfache Verneinungen
+1.8 Der bestimmte & unbestimmte Artikel (a/an/the)
+1.9 Nomen – Einzahl/Mehrzahl
+1.10 Adjektive & Steigerung (big, bigger, biggest)
+1.11 Possessivpronomen (my, your, his...)
+1.12 Präpositionen des Ortes (in, on, under...)
+1.13 Häufige Verben (go, have, do...)
+1.14 Present Simple (Gegenwart)
+1.15 Adverbien der Häufigkeit (always, sometimes...)
+1.16 Modalverben: can / can't
+1.17 Fragen mit "do" / "does"
+1.18 Wortstellung im Satz
+1.19 Vokabelthemen: Familie, Alltag, Essen
+1.20 Kleine Dialoge: sich vorstellen, einkaufen
+*/
+
+        const LOCALSTORAGE_PREFIX = "globalwiki_de_en"; 
+
+        const audioData = [
+        {
+                title: "Saint-Barthélemy: Insel der Gegensätze",
+                description: "Entdecken Sie Saint-Barthélemy: Von vergessener Geschichte zum Jetset-Juwel. Ein karibisches Paradies voller Luxus, Natur und einzigartiger Kultur",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0019.mp3"
+            },
+            {
+                title: "Le Mans: Mythos, Rennen, Zukunft",
+                description: "Erleben Sie die Faszination der 24 Stunden von Le Mans: Eine Reise durch ein Jahrhundert voller Innovation, dramatischer Rivalitäten und legendärer Siege.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0018.mp3"
+            },
+            {
+                title: "Madeira: Vulkan, Zucker, Wein und Wandel",
+                description: "Entdecke Madeiras faszinierende Geschichte: Vom Vulkan zur Zuckerinsel, vom Wein zum Innovationsmodell. Eine Insel im stetigen Wandel.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0017.mp3"
+            },
+        {
+                title: "Dreamliner: Eine turbulente Revolution",
+                description: "Der Boeing 787 sollte die Luftfahrt revolutionieren. Doch Qualitätsmängel, Brände und Skandale begleiten seinen Flug. Ein Traumflieger mit Schattenseiten.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0016.mp3"
+            },
+            {
+                title: "Irans Revolutionsgarden: Macht ohne Grenzen",
+                description: "Vom Wächter zur Supermacht: Erforsche, wie die iranischen Revolutionsgarden Politik, Wirtschaft und Militär beherrschen und das Rückgrat des Regimes bilden",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0015.mp3"
+            },
+            {
+                title: "Mossad: Israels Unsichtbare Klinge",
+                description: "Entdecke den Mossad: Israels geheimnisvolle Klinge. Von legendären Missionen bis zu Skandalen – ein Blick hinter die Kulissen dieses weltweit gefürchteten Dienstes",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0014.mp3"
+            },
+        {
+                title: "Goldener Pharao: Leben und Tod",
+                description: "Er war Kindkönig, gezeichnet von Krankheit. Sein Grab verbarg unvorstellbare Schätze. Entdecken Sie die wahre Geschichte des Goldjungen. Ein Leben kurz, ein Mythos ewig.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0013.mp3"
+            },
+        {
+                title: "Das Chamäleon Luis Enrique",
+                description: "Vom Spieler zum Champion, über Real und Barça bis Paris. Die extreme Karriere von Luis Enrique, dem Chamäleon",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0012.mp3"
+            },
+        {
+                title: "Die Tu-95: Brüllender Bär",
+                description: "Kaltkriegs-Legende mit Propellern im Jet-Zeitalter. Donnernder Sound, atomare Wucht – sie fliegt noch heute und prägt Konflikte",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0011.mp3"
+            },
+        {
+                title: "Tina Turner: Phönix aus Nutbush",
+                description: "Von Missbrauch zum Superstar: Erfahre, wie Tina Turner sich zur Rock-Königin kämpfte und über 180 Millionen Tonträger verkaufte. Eine Geschichte von Stärke und Triumph",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0010.mp3"
+            },
+        {
+                title: "Cleopatra: Macht, Mythos, Untergang",
+                description: "Mehr als Mythos: Erfahren Sie alles über Cleopatra, Ägyptens letzte Königin. Ihre Macht, Intrigen, Allianzen und das dramatische Ende einer Ära.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0009.mp3"
+            },
+        {
+                title: "Mythos Alcatraz: Mehr als ein Gefängnis",
+                description: "Alcatraz: Einst härtestes Gefängnis, heute Touristenmagnet. Tauchen Sie ein in die Legenden von Fluchtversuchen, berühmten Insassen und der Besetzung des Felsens.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0008.mp3"
+            },
+        {
+                title: "Pentagon: Symbol, Schatten, Widerstand",
+                description: "Mehr als nur ein Gebäude: Das Pentagon ist Symbol für Macht, Widerstand, Vertreibung und tragische Angriffe. Eine Geschichte aus Beton.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0007.mp3"
+            },
+        {
+                title: "Das stärkste Beben aller Zeiten",
+                description: "Mw 9,5: Das stärkste Beben veränderte Landschaften, löste Tsunamis aus und schrieb Erdbebengeschichte.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0006.mp3"
+            },
+        {
+                title: "Mauritius: Insel, Feuer, Wunder",
+                description: "Vulkanische Entstehung, bewegte Geschichte, Wirtschaftswunder. Entdecken Sie die facettenreiche Insel Mauritius, wo Natur, Kultur und Vergangenheit aufeinandertreffen!",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0005.mp3"
+            },
+            {
+                title: "Mount St. Helens – Feuer, Mythos, Leben",
+                description: "Der explosivste Vulkan Nordamerikas erzählt von Zerstörung, Wiedergeburt und uralten Mythen – eine Naturgeschichte voller Spannung, Glut und Überraschungen.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0004.mp3"
+            },
+            {
+                title: "Die RAF: Deutschlands blutige Jahre",
+                description: "Tauche ein in die fesselnde Geschichte der RAF, die Deutschland in den 70ern und 80ern prägte. Erfahre alles über ihre Entstehung, Taten und das dramatische Ende dieser Terrororganisation.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0003.mp3"
+            },
+            {
+                title: "Leo XIV. – Der Papst der Brücken",
+                description: "Vom Chicagoer Ministranten zum Papst: Leo XIV. verbindet Kontinente, Kulturen und Kirchenflügel – ein Porträt voller Wendungen, Mut und Menschlichkeit.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0002.mp3"
+            },
+            {
+                title: "Glitzer, Punkte, Politik: Der ESC",
+                description: "Vom Friedensprojekt zur queeren Pop-Show – die unglaubliche Geschichte des Eurovision Song Contests, erzählt wie ein spannender Roadtrip durch Europas Kulturgeschichte.",
+                mp3: "https://marcushoja.github.io/podcasts/GlobalWiki/de/de/0001.mp3"
+            }
+        ];
+
+        // Globale Variable für den aktuell spielenden Audio-Player
+        let currentlyPlaying = null;
+        
+        // Cache für Audiodauern
+        const durationCache = {};
+        
+        // Versuche, gespeicherte Dauern aus dem localStorage zu laden
+        try {
+            const cachedDurations = localStorage.getItem('audio-durations');
+            if (cachedDurations) {
+                Object.assign(durationCache, JSON.parse(cachedDurations));
+            }
+        } catch (e) {
+            console.error('Fehler beim Laden der gecachten Audiodauern:', e);
+        }
+
+        // Funktion zum Erstellen der Player
+        function createPlayers() {
+            const container = document.getElementById('players-container');
+            const audioElements = [];
+            
+            let currentHeadline = null;
+            
+            audioData.forEach((item, index) => {
+                // Wenn es sich um eine Überschrift handelt
+                if (item.headline) {
+                    const headlineDiv = document.createElement('div');
+                    headlineDiv.className = 'section-headline';
+                    headlineDiv.textContent = item.headline;
+                    container.appendChild(headlineDiv);
+                    currentHeadline = item.headline;
+                    return; // Überschriften haben keinen Player, daher hier beenden
+                }
+                
+                const playerId = `player-${index}`;
+                const storageKey = `${LOCALSTORAGE_PREFIX}_${item.mp3.split('/').pop()}`;
+                const durationKey = item.mp3;
+                
+                // Player-Container erstellen
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-container';
+                
+                // HTML für den Player erstellen, mit optionaler Beschreibung
+                let playerHTML = `<div class="player-header">${item.title}</div>`;
+                
+                // Beschreibung hinzufügen, falls vorhanden
+                if (item.description) {
+                    playerHTML += `<div class="player-description">${item.description}</div>`;
+                }
+                
+                playerHTML += `
+                    <div class="player-controls">
+                        <button class="play-button" id="play-${index}">
+                            <span class="material-icons">play_arrow</span>
+                        </button>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-${index}">
+                                <div class="progress" id="progress-${index}"></div>
+                            </div>
+                        </div>
+                        <div class="time" id="time-${index}">${durationCache[durationKey] && durationCache[durationKey] > 0 ? formatTime(durationCache[durationKey]) : ''}</div>
+                        <span class="material-icons completed-indicator" id="completed-${index}">check_circle</span>
+                        <span class="material-icons reset-button" id="reset-${index}" title="Fortschritt zurücksetzen">restart_alt</span>
+                    </div>
+                `;
+                
+                playerDiv.innerHTML = playerHTML;
+                container.appendChild(playerDiv);
+                
+                // Audio-Element wird erst bei Bedarf erstellt
+                let audio = null;
+                
+                const playButton = document.getElementById(`play-${index}`);
+                const progressBar = document.getElementById(`progress-bar-${index}`);
+                const progress = document.getElementById(`progress-${index}`);
+                const timeDisplay = document.getElementById(`time-${index}`);
+                const completedIndicator = document.getElementById(`completed-${index}`);
+                const resetButton = document.getElementById(`reset-${index}`);
+                
+                // Funktion zum Initialisieren des Audio-Elements
+                function initAudio() {
+                    if (!audio) {
+                        audio = new Audio();
+                        audio.src = item.mp3;
+                        audio.id = playerId;
+                        audioElements.push(audio);
+                        
+                        // Gespeicherte Position laden
+                        const savedPosition = localStorage.getItem(storageKey);
+                        if (savedPosition) {
+                            const position = parseFloat(savedPosition);
+                            audio.currentTime = isNaN(position) ? 0 : position;
+                        }
+                        
+                        // Wenn Metadaten geladen sind (Dauer verfügbar)
+                        audio.addEventListener('loadedmetadata', () => {
+                            // Dauer im Cache speichern
+                            durationCache[durationKey] = audio.duration;
+                            
+                            // Cache in localStorage speichern
+                            try {
+                                localStorage.setItem('audio-durations', JSON.stringify(durationCache));
+                            } catch (e) {
+                                console.error('Fehler beim Speichern der Audiodauern:', e);
+                            }
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+                            
+                            // Fortschrittsbalken aktualisieren, falls eine Position gespeichert ist
+                            const savedPosition = localStorage.getItem(storageKey);
+                            if (savedPosition) {
+                                const position = parseFloat(savedPosition);
+                                if (!isNaN(position) && position > 0) {
+                                    const percent = (position / audio.duration) * 100;
+                                    progress.style.width = `${percent}%`;
+                                }
+                            }
+                        });
+                        
+                        // Fortschritt aktualisieren
+                        audio.addEventListener('timeupdate', () => {
+                            const percent = (audio.currentTime / audio.duration) * 100;
+                            progress.style.width = `${percent}%`;
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+                            
+                            // Position im LocalStorage speichern
+                            localStorage.setItem(storageKey, audio.currentTime.toString());
+                            
+                            // Reset-Button anzeigen, wenn Fortschritt vorhanden
+                            if (audio.currentTime > 0 && !localStorage.getItem(`${storageKey}_completed`)) {
+                                resetButton.style.display = 'inline';
+                            }
+                        });
+                        
+                        // Wenn Audio zu Ende ist
+                        audio.addEventListener('ended', () => {
+                            playButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                            audio.currentTime = 0;
+                            localStorage.removeItem(storageKey);
+                            currentlyPlaying = null;
+                            
+                            // Als abgeschlossen markieren
+                            localStorage.setItem(`${storageKey}_completed`, 'true');
+                            checkCompletion();
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+
+                            Android.stopAudioService();
+                        });
+
+                        audio.addEventListener('pause', () => {
+                            Android.stopAudioService();
+                        });
+
+                        audio.addEventListener('play', () => {
+                            Android.startAudioService();
+                        });
+                    }
+                    return audio;
+                }
+                
+                // Funktion zum Aktualisieren der Zeitanzeige
+                function updateTimeDisplay() {
+                    const currentTime = audio && audio.currentTime > 0 ? formatTime(audio.currentTime) : '';
+                    const duration = audio && audio.duration > 0 ? formatTime(audio.duration) : 
+                                    (durationCache[durationKey] && durationCache[durationKey] > 0 ? formatTime(durationCache[durationKey]) : '');
+                    
+                    if (currentTime && duration) {
+                        timeDisplay.textContent = `${currentTime} / ${duration}`;
+                    } else if (duration) {
+                        timeDisplay.textContent = duration;
+                    } else {
+                        timeDisplay.textContent = '';
+                    }
+                }
+                
+                // Funktion zum Formatieren der Zeit
+                function formatTime(seconds) {
+                    if (!seconds || isNaN(seconds)) return '0:00';
+                    
+                    const minutes = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+                    
+                    return `${minutes}:${secs}`;
+                }
+                
+                // Funktion zum Prüfen, ob die Folge als abgeschlossen markiert werden soll
+                function checkCompletion() {
+                    const completionKey = `${storageKey}_completed`;
+                    const isCompleted = localStorage.getItem(completionKey) === 'true';
+                    
+                    if (isCompleted) {
+                        completedIndicator.style.display = 'inline';
+                        resetButton.style.display = 'inline';
+                    } else {
+                        completedIndicator.style.display = 'none';
+                        
+                        // Reset-Button nur anzeigen, wenn es einen Fortschritt gibt
+                        const hasProgress = localStorage.getItem(storageKey) && parseFloat(localStorage.getItem(storageKey)) > 0;
+                        resetButton.style.display = hasProgress ? 'inline' : 'none';
+                    }
+                }
+                
+                // Initialen Zustand prüfen
+                checkCompletion();
+                
+                // Gespeicherte Position anzeigen, falls vorhanden
+                const savedPosition = localStorage.getItem(storageKey);
+                if (savedPosition) {
+                    const position = parseFloat(savedPosition);
+                    if (!isNaN(position) && position > 0 && durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        const currentTime = formatTime(position);
+                        const duration = formatTime(durationCache[durationKey]);
+                        timeDisplay.textContent = `${currentTime} / ${duration}`;
+                        
+                        // Fortschrittsbalken aktualisieren
+                        const percent = (position / durationCache[durationKey]) * 100;
+                        progress.style.width = `${percent}%`;
+                        
+                        // Reset-Button anzeigen
+                        resetButton.style.display = 'inline';
+                    } else if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        // Nur die Dauer anzeigen, wenn keine gültige Position gespeichert ist
+                        timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                    }
+                } else if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                    // Nur die Dauer anzeigen, wenn keine Position gespeichert ist
+                    timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                } else {
+                    // Nichts anzeigen, wenn weder Position noch Dauer bekannt sind
+                    timeDisplay.textContent = '';
+                }
+                
+                // Reset-Button-Funktionalität
+                resetButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Verhindert, dass der Click-Event zum Player durchdringt
+                    
+                    // Fortschritt zurücksetzen
+                    localStorage.removeItem(storageKey);
+                    localStorage.removeItem(`${storageKey}_completed`);
+                    
+                    if (audio) {
+                        audio.currentTime = 0;
+                        progress.style.width = '0%';
+                    }
+                    
+                    // Anzeige aktualisieren
+                    if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                    } else {
+                        timeDisplay.textContent = '';
+                    }
+                    
+                    // Status-Anzeigen aktualisieren
+                    checkCompletion();
+                });
+                
+                // Play/Pause-Funktion
+                playButton.addEventListener('click', () => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        audio = initAudio();
+                    }
+                    
+                    if (audio.paused) {
+                        // Wenn ein anderer Player gerade spielt, diesen pausieren
+                        if (currentlyPlaying && currentlyPlaying !== audio) {
+                            currentlyPlaying.pause();
+                            // Den Play-Button des anderen Players zurücksetzen
+                            const otherIndex = audioElements.indexOf(currentlyPlaying);
+                            if (otherIndex !== -1) {
+                                const otherPlayButton = document.getElementById(`play-${otherIndex}`);
+                                if (otherPlayButton) {
+                                    otherPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                                }
+                            }
+                        }
+                        
+                        audio.play();
+                        currentlyPlaying = audio;
+                        playButton.innerHTML = '<span class="material-icons">pause</span>';
+                    } else {
+                        audio.pause();
+                        currentlyPlaying = null;
+                        playButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                    }
+                });
+                
+                // Drag-Funktionalität für den Fortschrittsbalken
+                let isDragging = false;
+                
+                // Klick und Touch auf Fortschrittsbalken
+                progressBar.addEventListener('mousedown', (e) => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        initAudio();
+                    }
+                    
+                    isDragging = true;
+                    updateProgressFromEvent(e);
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+                
+                progressBar.addEventListener('touchstart', (e) => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        initAudio();
+                    }
+                    
+                    isDragging = true;
+                    updateProgressFromEvent(e);
+                    document.addEventListener('touchmove', handleTouchMove);
+                    document.addEventListener('touchend', handleTouchEnd);
+                });
+                
+                function handleMouseMove(e) {
+                    if (isDragging) {
+                        updateProgressFromEvent(e);
+                    }
+                }
+                
+                function handleTouchMove(e) {
+                    if (isDragging) {
+                        e.preventDefault(); // Verhindert Scrollen während des Ziehens
+                        updateProgressFromEvent(e);
+                    }
+                }
+                
+                function handleMouseUp() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+                
+                function handleTouchEnd() {
+                    isDragging = false;
+                    document.removeEventListener('touchmove', handleTouchMove);
+                    document.removeEventListener('touchend', handleTouchEnd);
+                }
+                
+                function updateProgressFromEvent(e) {
+                    if (!audio || !audio.duration || isNaN(audio.duration)) return;
+                    
+                    const rect = progressBar.getBoundingClientRect();
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    let pos = (clientX - rect.left) / rect.width;
+                    
+                    // Begrenze den Wert zwischen 0 und 1
+                    pos = Math.max(0, Math.min(1, pos));
+                    
+                    // Stelle sicher, dass wir einen gültigen Wert haben
+                    const newTime = pos * audio.duration;
+                    if (!isNaN(newTime) && isFinite(newTime)) {
+                        audio.currentTime = newTime;
+                    }
+                }
+            });
+        }
+        
+        // Player erstellen, wenn die Seite geladen ist
+        document.addEventListener('DOMContentLoaded', createPlayers);
+    </script>
+</body>
+</html>
