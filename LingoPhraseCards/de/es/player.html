@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lingo Phrase Cards Player</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 16px;
+            color: #212121;
+            /* Verhindert Zoom bei Doppelklick */
+            touch-action: manipulation;
+        }
+        
+        /* Verhindert Textauswahl und damit verbundenes Zoomen */
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Erlaubt Textauswahl nur in bestimmten Elementen, falls nötig */
+        .selectable-text {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        .player-container {
+            max-width: 500px;
+            margin: 8px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.12);
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        .player-container:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.16);
+        }
+        .player-header {
+            padding: 10px 14px;
+            font-size: 0.85em;
+            background: linear-gradient(to right, rgba(100, 149, 237, 0.85), rgba(138, 180, 248, 0.75));
+            color: white;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+        .player-description {
+            padding: 8px 14px;
+            font-size: 0.7em;
+            color: #a2a2a2;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+            line-height: 1.4;
+        }
+        .section-headline {
+            padding: 8px 14px;
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #939393;
+            /** background-color: rgba(138, 180, 248, 0.25);*/
+            margin: 14px 0 6px 0;
+            border-radius: 4px;
+            text-align: center;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            /*box-shadow: 0 1px 1px rgba(0,0,0,0.05);*/
+        }
+        .player-controls {
+            display: flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-bottom: none;
+        }
+        .play-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6495ED;
+            margin-right: 10px;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            padding: 4px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .play-button:hover {
+            background-color: rgba(100, 149, 237, 0.08);
+        }
+        .play-button:focus {
+            outline: none;
+        }
+        .play-button:active {
+            outline: none;
+            background-color: rgba(100, 149, 237, 0.16);
+        }
+        .play-button::-moz-focus-inner {
+            border: 0;
+        }
+        .material-icons {
+            font-size: 24px;
+        }
+        .progress-container {
+            flex-grow: 1;
+            margin-right: 10px;
+            position: relative;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+        .progress {
+            height: 100%;
+            background: #6495ED;
+            border-radius: 2px;
+            width: 0%;
+            position: relative;
+        }
+        .progress::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: -4px;
+            width: 12px;
+            height: 12px;
+            background: #6495ED;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transform: scale(0);
+            transition: transform 0.1s;
+        }
+        .progress-container:hover .progress::after,
+        .progress-container:active .progress::after {
+            transform: scale(1);
+        }
+        .time {
+            font-size: 11px;
+            color: #757575;
+            min-width: 65px;
+            text-align: right;
+        }
+        
+        .completed-indicator {
+            margin-left: 5px;
+            color: #4CAF50;
+            display: none;
+            font-size: 18px;
+        }
+        
+        .reset-button {
+            margin-left: 5px;
+            color: #9e9e9e;
+            cursor: pointer;
+            display: none;
+            font-size: 18px;
+        }
+        
+        .reset-button:hover {
+            color: #f44336;
+        }
+        
+        /* Für bessere Touch-Interaktion auf mobilen Geräten */
+        @media (max-width: 768px) {
+            .progress-bar {
+                height: 5px;
+            }
+            .progress::after {
+                transform: scale(1);
+                width: 14px;
+                height: 14px;
+                right: -7px;
+                top: -4px;
+            }
+            .progress-container {
+                padding: 6px 0;
+            }
+            .player-container {
+                margin: 8px auto;
+            }
+            .section-headline {
+                margin: 10px auto 5px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="players-container"></div>
+
+    <script>
+        // Beispiel-JSON mit Titeln und MP3-Links
+
+        /**
+A1 – Anfänger (Grundlagen des Spanischen)
+1. Aussprache & Alphabet
+2. Begrüßung und Verabschiedung
+3. Sich vorstellen (Name, Herkunft, Beruf)
+4. Zahlen & Uhrzeit
+5. Wochentage, Monate, Datum
+6. Farben und Formen
+7. Grundlegende Fragen stellen (Wer? Was? Wo?)
+8. Artikel & Substantive (Singular/Plural, männlich/weiblich)
+9. Personalpronomen
+10. Verben im Präsens (regelmäßige Verben)
+11. Häufige unregelmäßige Verben (ser, estar, tener, ir)
+12. Verneinung & Fragebildung
+13. Possessivbegleiter (mi, tu, su...)
+14. Adjektive & deren Stellung
+15. Ortsangaben & Präpositionen (en, a, con, sin, de...)
+
+A2 – Anfänger mit Vorkenntnissen
+16. Reflexive Verben (levantarse, llamarse...)
+17. Gustar & ähnliche Verben
+18. Vergleich & Steigerung von Adjektiven
+19. Modalverben (poder, querer, deber)
+20. Vergangenheitsform: Pretérito perfecto
+21. Häufigkeitsadverbien & Zeitangaben
+22. Essen & Trinken – im Restaurant bestellen
+23. Einkaufen – Kleidung & Preise
+24. Tagesablauf beschreiben
+25. Wegbeschreibung geben & verstehen
+26. Familie & Beziehungen
+27. Gesundheit & Arztbesuch
+28. Wetter & Jahreszeiten
+29. Hobbys & Freizeitgestaltung
+30. Reisen & Unterkunft buchen
+
+B1 – Mittelstufe (selbstständige Sprachverwendung)
+31. Vergangenheitsform: Indefinido
+32. Unterschied: Indefinido vs. Perfecto
+33. Vergangenheitsform: Imperfecto
+34. Zukunft: ir + a + Infinitiv & Futuro simple
+35. Objektpronomen (lo, la, le, los, las...)
+36. Relativsätze (que, quien, donde...)
+37. Konditionalsätze Typ I
+38. Redewendungen & idiomatische Ausdrücke
+39. Telefonieren & E-Mails schreiben
+40. Vorstellungsgespräch & Lebenslauf auf Spanisch
+41. Meinung ausdrücken (creo que, pienso que...)
+42. Probleme lösen & Vorschläge machen
+43. Gefühle & Emotionen beschreiben
+44. Filme, Musik, Bücher beschreiben
+45. Unterschiede Lateinamerika – Spanien
+
+B2 – Fortgeschrittene Mittelstufe
+46. Subjuntivo Präsens – Grundlagen & Gebrauch
+47. Subjuntivo in Nebensätzen (Wünsche, Zweifel, Emotionen)
+48. Konditionalsätze Typ II & III
+49. Passivkonstruktionen (ser + participio, se pasivo)
+50. Nominalisierung & stilistische Mittel
+51. Argumentieren & diskutieren auf Spanisch
+52. Komplexe Satzstrukturen & Konnektoren (aunque, mientras, sin embargo)
+53. Bewerbung & Berufssprache (z. B. in Meetings sprechen)
+54. Präsentationen halten
+55. Geschäftskorrespondenz (formell/informell)
+
+C1/C2 – Profi-Niveau (kompetente Sprachverwendung)
+56. Subjuntivo Vergangenheit (Imperfecto & Pluscuamperfecto)
+57. Stilistische Feinheiten & Nuancen im Ausdruck
+58. Ironie, Sarkasmus, Wortspiele verstehen und verwenden
+59. Reden, Vorträge & Debatten auf hohem Niveau führen
+60. Spanisch für spezielle Fachbereiche (z. B. Jura, Medizin, Wirtschaft)
+
+*/
+
+        const LOCALSTORAGE_PREFIX = "lingophrasecards_de_es";
+
+        const audioData = [
+            {
+                headline: "A1 – Anfänger (Grundlagen des Spanischen)",
+            },
+            {
+                title: "1. Aussprache & Alphabet",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/01.mp3"
+            },
+            {
+                title: "2. Begrüßung und Verabschiedung",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/02.mp3"
+            },
+            {
+                title: "3. Sich vorstellen (Name, Herkunft, Beruf)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/03.mp3"
+            },
+            {
+                title: "4. Zahlen & Uhrzeit",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/04.mp3"
+            },
+            {
+                title: "5. Wochentage, Monate, Datum",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/05.mp3"
+            },
+            {
+                title: "6. Farben und Formen",  
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/06.mp3"
+            },
+            {
+                title: "7. Grundlegende Fragen stellen (Wer? Was? Wo?)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/07.mp3"
+            },
+            {
+                title: "8. Artikel & Substantive (Singular/Plural, männlich/weiblich)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/08.mp3"
+            },
+            {
+                title: "9. Personalpronomen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/09.mp3"
+            },
+            {
+                title: "10. Verben im Präsens (regelmäßige Verben)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/10.mp3"
+            },  
+            {
+                title: "11. Häufige unregelmäßige Verben (ser, estar, tener, ir)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/11.mp3"
+            },
+            {
+                title: "12. Verneinung & Fragebildung", 
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/12.mp3"
+            },
+            {
+                title: "13. Possessivbegleiter (mi, tu, su...)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/13.mp3"
+            },  
+            {
+                title: "14. Adjektive & deren Stellung",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/14.mp3"
+            },
+            {
+                title: "15. Ortsangaben & Präpositionen (en, a, con, sin, de...)",  
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/15.mp3"
+            },
+            {
+                headline: "A2 – Anfänger mit Vorkenntnissen",
+            },
+            {
+                title: "16. Reflexive Verben (levantarse, llamarse...)",            
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/16.mp3"
+            },
+            {
+                title: "17. Gustar & ähnliche Verben",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/17.mp3"
+            },
+            {
+                title: "18. Vergleich & Steigerung von Adjektiven",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/18.mp3"
+            },
+            {
+                title: "19. Modalverben (poder, querer, deber)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/19.mp3"
+            },
+            {
+                title: "20. Vergangenheitsform: Pretérito perfecto",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/20.mp3"
+            },
+            {
+                title: "21. Häufigkeitsadverbien & Zeitangaben",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/21.mp3"
+            },
+            {
+                title: "22. Essen & Trinken – im Restaurant bestellen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/22.mp3"
+            },
+            {
+                title: "23. Einkaufen – Kleidung & Preise",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/23.mp3"
+            },
+            {
+                title: "24. Tagesablauf beschreiben",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/24.mp3"
+            },
+            {
+                title: "25. Wegbeschreibung geben & verstehen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/25.mp3"
+            },
+            {
+                title: "26. Familie & Beziehungen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/26.mp3"
+            },
+            {
+                title: "27. Gesundheit & Arztbesuch",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/27.mp3"
+            },
+            {
+                title: "28. Wetter & Jahreszeiten",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/28.mp3"
+            },
+            {
+                title: "29. Hobbys & Freizeitgestaltung",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/29.mp3"
+            },
+            {
+                title: "30. Reisen & Unterkunft buchen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/30.mp3"
+            },
+            {
+                headline: "B1 – Mittelstufe (selbstständige Sprachverwendung)",
+            },
+            {
+                title: "31. Vergangenheitsform: Indefinido",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/31.mp3"
+            },
+            {
+                title: "32. Unterschied: Indefinido vs. Perfecto",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/32.mp3"
+            },
+            {
+                title: "33. Vergangenheitsform: Imperfecto",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/33.mp3"
+            },
+            {
+                title: "34. Zukunft: ir + a + Infinitiv & Futuro simple",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/34.mp3"
+            },
+            {
+                title: "35. Objektpronomen (lo, la, le, los, las...)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/35.mp3"
+            },
+            {
+                title: "36. Relativsätze (que, quien, donde...)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/36.mp3"
+            },
+            {
+                title: "37. Konditionalsätze Typ I",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/37.mp3"
+            },
+            {
+                title: "38. Redewendungen & idiomatische Ausdrücke",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/38.mp3"
+            },
+            {
+                title: "39. Telefonieren & E-Mails schreiben",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/39.mp3"
+            },
+            {
+                title: "40. Vorstellungsgespräch & Lebenslauf auf Spanisch",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/40.mp3"
+            },
+            {
+                title: "41. Meinung ausdrücken (creo que, pienso que...)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/41.mp3"
+            },
+            {
+                title: "42. Probleme lösen & Vorschläge machen",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/42.mp3"
+            },
+            {
+                title: "43. Gefühle & Emotionen beschreiben",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/43.mp3"
+            },
+            {
+                title: "44. Filme, Musik, Bücher beschreiben",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/44.mp3"
+            },
+            {
+                title: "45. Unterschiede Lateinamerika – Spanien",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/45.mp3"
+            },
+            {
+                headline: "B2 – Fortgeschrittene Mittelstufe",
+            },
+            {
+                title: "46. Subjuntivo Präsens – Grundlagen & Gebrauch",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/46.mp3"
+            },
+            {
+                title: "47. Subjuntivo in Nebensätzen (Wünsche, Zweifel, Emotionen)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/47.mp3"
+            },
+            {
+                title: "48. Konditionalsätze Typ II & III",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/48.mp3"
+            },
+            {
+                title: "49. Passivkonstruktionen (ser + participio, se pasivo)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/49.mp3"
+            },
+            {
+                title: "50. Nominalisierung & stilistische Mittel",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/50.mp3"
+            },
+            {
+                title: "51. Argumentieren & diskutieren auf Spanisch",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/51.mp3"
+            },
+            {
+                title: "52. Komplexe Satzstrukturen & Konnektoren (aunque, mientras, sin embargo)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/52.mp3"
+            },
+            {
+                title: "53. Bewerbung & Berufssprache (z. B. in Meetings sprechen)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/53.mp3"
+            },
+            {
+                title: "54. Präsentationen halten",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/54.mp3"
+            },
+            {
+                title: "55. Geschäftskorrespondenz (formell/informell)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/55.mp3"
+            },
+            {
+                headline: "C1/C2 – Profi-Niveau (kompetente Sprachverwendung)",
+            },
+            {
+                title: "56. Subjuntivo Vergangenheit (Imperfecto & Pluscuamperfecto)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/56.mp3"
+            },
+            {
+                title: "57. Stilistische Feinheiten & Nuancen im Ausdruck",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/57.mp3"
+            },
+            {
+                title: "58. Ironie, Sarkasmus, Wortspiele verstehen und verwenden",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/58.mp3"
+            },
+            {
+                title: "59. Präsentationen halten",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/59.mp3"
+            },
+            {
+                title: "60. Geschäftskorrespondenz (formell/informell)",
+                mp3: "https://marcushoja.github.io/podcasts/LingoPhraseCards/de/es/60.mp3"
+            }
+        ];
+
+        // Globale Variable für den aktuell spielenden Audio-Player
+        let currentlyPlaying = null;
+        
+        // Cache für Audiodauern
+        const durationCache = {};
+        
+        // Versuche, gespeicherte Dauern aus dem localStorage zu laden
+        try {
+            const cachedDurations = localStorage.getItem('audio-durations');
+            if (cachedDurations) {
+                Object.assign(durationCache, JSON.parse(cachedDurations));
+            }
+        } catch (e) {
+            console.error('Fehler beim Laden der gecachten Audiodauern:', e);
+        }
+
+        // Funktion zum Erstellen der Player
+        function createPlayers() {
+            const container = document.getElementById('players-container');
+            const audioElements = [];
+            
+            let currentHeadline = null;
+            
+            audioData.forEach((item, index) => {
+                // Wenn es sich um eine Überschrift handelt
+                if (item.headline) {
+                    const headlineDiv = document.createElement('div');
+                    headlineDiv.className = 'section-headline';
+                    headlineDiv.textContent = item.headline;
+                    container.appendChild(headlineDiv);
+                    currentHeadline = item.headline;
+                    return; // Überschriften haben keinen Player, daher hier beenden
+                }
+                
+                const playerId = `player-${index}`;
+                const storageKey = `${LOCALSTORAGE_PREFIX}_${item.mp3.split('/').pop()}`;
+                const durationKey = item.mp3;
+                
+                // Player-Container erstellen
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-container';
+                
+                // HTML für den Player erstellen, mit optionaler Beschreibung
+                let playerHTML = `<div class="player-header">${item.title}</div>`;
+                
+                // Beschreibung hinzufügen, falls vorhanden
+                if (item.description) {
+                    playerHTML += `<div class="player-description">${item.description}</div>`;
+                }
+                
+                playerHTML += `
+                    <div class="player-controls">
+                        <button class="play-button" id="play-${index}">
+                            <span class="material-icons">play_arrow</span>
+                        </button>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar-${index}">
+                                <div class="progress" id="progress-${index}"></div>
+                            </div>
+                        </div>
+                        <div class="time" id="time-${index}">${durationCache[durationKey] && durationCache[durationKey] > 0 ? formatTime(durationCache[durationKey]) : ''}</div>
+                        <span class="material-icons completed-indicator" id="completed-${index}">check_circle</span>
+                        <span class="material-icons reset-button" id="reset-${index}" title="Fortschritt zurücksetzen">restart_alt</span>
+                    </div>
+                `;
+                
+                playerDiv.innerHTML = playerHTML;
+                container.appendChild(playerDiv);
+                
+                // Audio-Element wird erst bei Bedarf erstellt
+                let audio = null;
+                
+                const playButton = document.getElementById(`play-${index}`);
+                const progressBar = document.getElementById(`progress-bar-${index}`);
+                const progress = document.getElementById(`progress-${index}`);
+                const timeDisplay = document.getElementById(`time-${index}`);
+                const completedIndicator = document.getElementById(`completed-${index}`);
+                const resetButton = document.getElementById(`reset-${index}`);
+                
+                // Funktion zum Initialisieren des Audio-Elements
+                function initAudio() {
+                    if (!audio) {
+                        audio = new Audio();
+                        audio.src = item.mp3;
+                        audio.id = playerId;
+                        audioElements.push(audio);
+                        
+                        // Gespeicherte Position laden
+                        const savedPosition = localStorage.getItem(storageKey);
+                        if (savedPosition) {
+                            const position = parseFloat(savedPosition);
+                            audio.currentTime = isNaN(position) ? 0 : position;
+                        }
+                        
+                        // Wenn Metadaten geladen sind (Dauer verfügbar)
+                        audio.addEventListener('loadedmetadata', () => {
+                            // Dauer im Cache speichern
+                            durationCache[durationKey] = audio.duration;
+                            
+                            // Cache in localStorage speichern
+                            try {
+                                localStorage.setItem('audio-durations', JSON.stringify(durationCache));
+                            } catch (e) {
+                                console.error('Fehler beim Speichern der Audiodauern:', e);
+                            }
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+                            
+                            // Fortschrittsbalken aktualisieren, falls eine Position gespeichert ist
+                            const savedPosition = localStorage.getItem(storageKey);
+                            if (savedPosition) {
+                                const position = parseFloat(savedPosition);
+                                if (!isNaN(position) && position > 0) {
+                                    const percent = (position / audio.duration) * 100;
+                                    progress.style.width = `${percent}%`;
+                                }
+                            }
+                        });
+                        
+                        // Fortschritt aktualisieren
+                        audio.addEventListener('timeupdate', () => {
+                            const percent = (audio.currentTime / audio.duration) * 100;
+                            progress.style.width = `${percent}%`;
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+                            
+                            // Position im LocalStorage speichern
+                            localStorage.setItem(storageKey, audio.currentTime.toString());
+                            
+                            // Reset-Button anzeigen, wenn Fortschritt vorhanden
+                            if (audio.currentTime > 0 && !localStorage.getItem(`${storageKey}_completed`)) {
+                                resetButton.style.display = 'inline';
+                            }
+                        });
+                        
+                        // Wenn Audio zu Ende ist
+                        audio.addEventListener('ended', () => {
+                            playButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                            audio.currentTime = 0;
+                            localStorage.removeItem(storageKey);
+                            currentlyPlaying = null;
+                            
+                            // Als abgeschlossen markieren
+                            localStorage.setItem(`${storageKey}_completed`, 'true');
+                            checkCompletion();
+                            
+                            // Zeit-Anzeige aktualisieren
+                            updateTimeDisplay();
+                            Android.stopAudioService();
+                        });
+
+                        audio.addEventListener('pause', () => {
+                            Android.stopAudioService();
+                        });
+
+                        audio.addEventListener('play', () => {
+                            Android.startAudioService();
+                        });
+                    }
+                    return audio;
+                }
+                
+                // Funktion zum Aktualisieren der Zeitanzeige
+                function updateTimeDisplay() {
+                    const currentTime = audio && audio.currentTime > 0 ? formatTime(audio.currentTime) : '';
+                    const duration = audio && audio.duration > 0 ? formatTime(audio.duration) : 
+                                    (durationCache[durationKey] && durationCache[durationKey] > 0 ? formatTime(durationCache[durationKey]) : '');
+                    
+                    if (currentTime && duration) {
+                        timeDisplay.textContent = `${currentTime} / ${duration}`;
+                    } else if (duration) {
+                        timeDisplay.textContent = duration;
+                    } else {
+                        timeDisplay.textContent = '';
+                    }
+                }
+                
+                // Funktion zum Formatieren der Zeit
+                function formatTime(seconds) {
+                    if (!seconds || isNaN(seconds)) return '0:00';
+                    
+                    const minutes = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+                    
+                    return `${minutes}:${secs}`;
+                }
+                
+                // Funktion zum Prüfen, ob die Folge als abgeschlossen markiert werden soll
+                function checkCompletion() {
+                    const completionKey = `${storageKey}_completed`;
+                    const isCompleted = localStorage.getItem(completionKey) === 'true';
+                    
+                    if (isCompleted) {
+                        completedIndicator.style.display = 'inline';
+                        resetButton.style.display = 'inline';
+                    } else {
+                        completedIndicator.style.display = 'none';
+                        
+                        // Reset-Button nur anzeigen, wenn es einen Fortschritt gibt
+                        const hasProgress = localStorage.getItem(storageKey) && parseFloat(localStorage.getItem(storageKey)) > 0;
+                        resetButton.style.display = hasProgress ? 'inline' : 'none';
+                    }
+                }
+                
+                // Initialen Zustand prüfen
+                checkCompletion();
+                
+                // Gespeicherte Position anzeigen, falls vorhanden
+                const savedPosition = localStorage.getItem(storageKey);
+                if (savedPosition) {
+                    const position = parseFloat(savedPosition);
+                    if (!isNaN(position) && position > 0 && durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        const currentTime = formatTime(position);
+                        const duration = formatTime(durationCache[durationKey]);
+                        timeDisplay.textContent = `${currentTime} / ${duration}`;
+                        
+                        // Fortschrittsbalken aktualisieren
+                        const percent = (position / durationCache[durationKey]) * 100;
+                        progress.style.width = `${percent}%`;
+                        
+                        // Reset-Button anzeigen
+                        resetButton.style.display = 'inline';
+                    } else if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        // Nur die Dauer anzeigen, wenn keine gültige Position gespeichert ist
+                        timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                    }
+                } else if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                    // Nur die Dauer anzeigen, wenn keine Position gespeichert ist
+                    timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                } else {
+                    // Nichts anzeigen, wenn weder Position noch Dauer bekannt sind
+                    timeDisplay.textContent = '';
+                }
+                
+                // Reset-Button-Funktionalität
+                resetButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Verhindert, dass der Click-Event zum Player durchdringt
+                    
+                    // Fortschritt zurücksetzen
+                    localStorage.removeItem(storageKey);
+                    localStorage.removeItem(`${storageKey}_completed`);
+                    
+                    if (audio) {
+                        audio.currentTime = 0;
+                        progress.style.width = '0%';
+                    }
+                    
+                    // Anzeige aktualisieren
+                    if (durationCache[durationKey] && durationCache[durationKey] > 0) {
+                        timeDisplay.textContent = formatTime(durationCache[durationKey]);
+                    } else {
+                        timeDisplay.textContent = '';
+                    }
+                    
+                    // Status-Anzeigen aktualisieren
+                    checkCompletion();
+                });
+                
+                // Play/Pause-Funktion
+                playButton.addEventListener('click', () => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        audio = initAudio();
+                    }
+                    
+                    if (audio.paused) {
+                        // Wenn ein anderer Player gerade spielt, diesen pausieren
+                        if (currentlyPlaying && currentlyPlaying !== audio) {
+                            currentlyPlaying.pause();
+                            // Den Play-Button des anderen Players zurücksetzen
+                            const otherIndex = audioElements.indexOf(currentlyPlaying);
+                            if (otherIndex !== -1) {
+                                const otherPlayButton = document.getElementById(`play-${otherIndex}`);
+                                if (otherPlayButton) {
+                                    otherPlayButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                                }
+                            }
+                        }
+                        
+                        audio.play();
+                        currentlyPlaying = audio;
+                        playButton.innerHTML = '<span class="material-icons">pause</span>';
+                    } else {
+                        audio.pause();
+                        currentlyPlaying = null;
+                        playButton.innerHTML = '<span class="material-icons">play_arrow</span>';
+                    }
+                });
+                
+                // Drag-Funktionalität für den Fortschrittsbalken
+                let isDragging = false;
+                
+                // Klick und Touch auf Fortschrittsbalken
+                progressBar.addEventListener('mousedown', (e) => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        initAudio();
+                    }
+                    
+                    isDragging = true;
+                    updateProgressFromEvent(e);
+                    document.addEventListener('mousemove', handleMouseMove);
+                    document.addEventListener('mouseup', handleMouseUp);
+                });
+                
+                progressBar.addEventListener('touchstart', (e) => {
+                    // Audio bei Bedarf initialisieren
+                    if (!audio) {
+                        initAudio();
+                    }
+                    
+                    isDragging = true;
+                    updateProgressFromEvent(e);
+                    document.addEventListener('touchmove', handleTouchMove);
+                    document.addEventListener('touchend', handleTouchEnd);
+                });
+                
+                function handleMouseMove(e) {
+                    if (isDragging) {
+                        updateProgressFromEvent(e);
+                    }
+                }
+                
+                function handleTouchMove(e) {
+                    if (isDragging) {
+                        e.preventDefault(); // Verhindert Scrollen während des Ziehens
+                        updateProgressFromEvent(e);
+                    }
+                }
+                
+                function handleMouseUp() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                }
+                
+                function handleTouchEnd() {
+                    isDragging = false;
+                    document.removeEventListener('touchmove', handleTouchMove);
+                    document.removeEventListener('touchend', handleTouchEnd);
+                }
+                
+                function updateProgressFromEvent(e) {
+                    if (!audio || !audio.duration || isNaN(audio.duration)) return;
+                    
+                    const rect = progressBar.getBoundingClientRect();
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    let pos = (clientX - rect.left) / rect.width;
+                    
+                    // Begrenze den Wert zwischen 0 und 1
+                    pos = Math.max(0, Math.min(1, pos));
+                    
+                    // Stelle sicher, dass wir einen gültigen Wert haben
+                    const newTime = pos * audio.duration;
+                    if (!isNaN(newTime) && isFinite(newTime)) {
+                        audio.currentTime = newTime;
+                    }
+                }
+            });
+        }
+        
+        // Player erstellen, wenn die Seite geladen ist
+        document.addEventListener('DOMContentLoaded', createPlayers);
+    </script>
+</body>
+</html>
